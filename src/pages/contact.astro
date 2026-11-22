@@ -1,0 +1,413 @@
+---
+import Base from '../layouts/Base.astro';
+import SplitHeading from '../components/SplitHeading.astro';
+import Button from '../components/Button.astro';
+import Footer from '../components/Footer.astro';
+import HireInfo from '../components/HireInfo.astro';
+import { config, faqSchema } from '../data/site';
+
+const { projectTypes: types, budgets, timelines } = config.contactForm;
+---
+
+<Base
+  title="Hire a Freelance Web Developer"
+  description={`Hire ${config.shortName}, a remote ${config.role.toLowerCase()} (Next.js, React, Astro, headless CMS, Stripe, AI). Send a project brief and get a reply within ${config.responseTime}.`}
+  schema={[faqSchema, { '@type': 'ContactPage', name: `Hire ${config.name}`, url: new URL('/contact', Astro.site).toString(), about: { '@id': `${Astro.site}#service` } }]}
+>
+  <section class="container intro">
+    <SplitHeading as="h1" text="Start a project" class="display" />
+    <p class="lede" data-reveal>
+      Interested in working together? Tell me about your project and I’ll get back to you within {config.responseTime}.
+    </p>
+  </section>
+
+  <section class="container layout">
+    <form
+      class="form"
+      method="post"
+      action="/api/contact"
+      data-contact-form
+      data-email={config.email}
+      data-whatsapp={config.whatsapp?.number}
+      data-reply={config.responseTime}
+      data-reveal
+    >
+      <div class="trap" aria-hidden="true">
+        <label for="website">Leave this empty</label>
+        <input id="website" name="website" tabindex="-1" autocomplete="off" />
+      </div>
+      <input type="hidden" name="started" value="" />
+      <div class="field">
+        <label for="name">Name</label>
+        <input id="name" name="name" autocomplete="name" required />
+      </div>
+      <div class="field">
+        <label for="email">Email address</label>
+        <input id="email" name="email" type="email" autocomplete="email" required />
+      </div>
+      <div class="field field--full">
+        <label for="company">Company name <span>optional</span></label>
+        <input id="company" name="company" autocomplete="organization" />
+      </div>
+
+      <fieldset class="field field--full">
+        <legend>Project type</legend>
+        <div class="pills">
+          {
+            types.map((t, i) => (
+              <label class="pill">
+                <input type="radio" name="type" value={t} required={i === 0} />
+                <span>{t}</span>
+              </label>
+            ))
+          }
+        </div>
+      </fieldset>
+
+      <fieldset class="field">
+        <legend>Estimated budget</legend>
+        <div class="pills">
+          {
+            budgets.map((b) => (
+              <label class="pill">
+                <input type="radio" name="budget" value={b} />
+                <span>{b}</span>
+              </label>
+            ))
+          }
+        </div>
+      </fieldset>
+
+      <fieldset class="field">
+        <legend>Project timeline</legend>
+        <div class="pills">
+          {
+            timelines.map((t) => (
+              <label class="pill">
+                <input type="radio" name="timeline" value={t} />
+                <span>{t}</span>
+              </label>
+            ))
+          }
+        </div>
+      </fieldset>
+
+      <div class="field field--full">
+        <label for="details">Project details</label>
+        <textarea id="details" name="details" rows="6" required placeholder="What are you building, and what does success look like?"></textarea>
+      </div>
+
+      <div class="submit field--full">
+        <Button type="submit" name="via" value="send">Send project brief</Button>
+        {config.whatsapp && <Button type="submit" name="via" value="whatsapp" variant="ghost">Send on WhatsApp</Button>}
+        <p class="note" data-form-status role="status" aria-live="polite">
+          Your brief goes straight to my inbox, and I reply to every one within {config.responseTime}.
+          {config.whatsapp && ' Prefer chatting? Send it on WhatsApp instead.'}
+        </p>
+      </div>
+    </form>
+
+    <aside class="aside" data-reveal style="--d: 0.15s">
+      <div class="card-dark">
+        <span class="status"><span class="status__dot" aria-hidden="true"></span>{config.availability.long}</span>
+        <h2>Have a chat</h2>
+        <p>You can also reach out directly.</p>
+        <dl>
+          <div>
+            <dt>Email</dt>
+            <dd><a href={`mailto:${config.email}`}>{config.email}</a></dd>
+          </div>
+          {
+            config.whatsapp && (
+              <div>
+                <dt>WhatsApp</dt>
+                <dd><a href={`https://wa.me/${config.whatsapp.number}`}>{config.whatsapp.label}</a></dd>
+              </div>
+            )
+          }
+          {
+            config.socials.map((s) => (
+              <div>
+                <dt>{s.label}</dt>
+                <dd><a href={s.href}>{s.handle}</a></dd>
+              </div>
+            ))
+          }
+        </dl>
+        <p class="time">
+          It’s <span data-local-time>—</span> in {config.location.city} ({config.utcOffset}).
+        </p>
+      </div>
+    </aside>
+  </section>
+
+  <HireInfo />
+
+  <div class="foot on-dark" slot="after">
+    <div class="container">
+      <Footer />
+    </div>
+  </div>
+</Base>
+
+<style>
+  .intro {
+    padding-top: clamp(48px, 7vw, 112px);
+    padding-bottom: clamp(40px, 5vw, 72px);
+  }
+
+  .intro .lede {
+    margin-top: clamp(24px, 3vw, 40px);
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 4fr);
+    gap: 32px clamp(32px, 4vw, 64px);
+    align-items: start;
+    padding-bottom: var(--section);
+  }
+
+  .form {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 28px 24px;
+    padding: clamp(24px, 3.4vw, 48px);
+    border-radius: 28px;
+    background: var(--surface);
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .field--full {
+    grid-column: 1 / -1;
+  }
+
+  label,
+  legend {
+    padding: 0;
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  label span {
+    font-weight: 400;
+    color: var(--muted);
+  }
+
+  legend {
+    margin-bottom: 10px;
+  }
+
+  input:not([type='radio']),
+  textarea {
+    width: 100%;
+    min-height: 52px;
+    padding: 14px 16px;
+    border: 1px solid var(--rule);
+    border-radius: 14px;
+    background: var(--paper);
+    font: inherit;
+    color: var(--ink);
+    transition:
+      border-color 0.2s,
+      background-color 0.2s,
+      box-shadow 0.2s;
+  }
+
+  textarea {
+    resize: vertical;
+    line-height: 1.5;
+  }
+
+  input:not([type='radio']):focus,
+  textarea:focus {
+    outline: none;
+    border-color: var(--ink);
+    background: #fff;
+    box-shadow: 0 0 0 4px rgb(200 23 79 / 0.14);
+  }
+
+  .pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .pill {
+    position: relative;
+    cursor: pointer;
+  }
+
+  .pill input {
+    position: absolute;
+    opacity: 0;
+    inset: 0;
+    cursor: pointer;
+  }
+
+  .pill span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 16px;
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    font-size: 15px;
+    font-weight: 500;
+    transition:
+      background-color 0.2s,
+      color 0.2s,
+      border-color 0.2s;
+  }
+
+  .pill:hover span {
+    border-color: var(--ink);
+  }
+
+  .pill input:checked + span {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--paper);
+  }
+
+  .pill input:focus-visible + span {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+
+  .submit {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .note {
+    flex-basis: 100%;
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  .note:global(.is-success) {
+    padding: 14px 18px;
+    border-radius: 14px;
+    background: #e3f4ea;
+    color: #14532d;
+    font-size: 15px;
+    font-weight: 550;
+  }
+
+  .note:global(.is-error) {
+    color: var(--accent);
+  }
+
+  .form:global(.is-busy) .submit {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+
+  .trap {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .aside {
+    position: sticky;
+    top: calc(var(--header-h) + 24px);
+  }
+
+  .card-dark {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: clamp(24px, 3vw, 40px);
+    border-radius: 28px;
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  .card-dark .status {
+    color: var(--dark-text);
+  }
+
+  .card-dark h2 {
+    margin-top: 12px;
+    font-size: clamp(30px, 3vw, 44px);
+    font-weight: 640;
+    font-stretch: 120%;
+    letter-spacing: -0.03em;
+  }
+
+  .card-dark > p {
+    color: var(--dark-text);
+  }
+
+  .card-dark dl {
+    display: grid;
+    gap: 18px;
+    margin-top: 12px;
+    padding-top: 20px;
+    border-top: 1px solid var(--dark-rule);
+  }
+
+  .card-dark dt {
+    font-size: 14px;
+    color: var(--dark-muted);
+  }
+
+  .card-dark dd {
+    margin-top: 2px;
+    font-size: 17px;
+    font-weight: 550;
+    overflow-wrap: anywhere;
+  }
+
+  .card-dark a {
+    text-decoration: none;
+  }
+
+  .card-dark a:hover {
+    color: #fff;
+  }
+
+  .time {
+    margin-top: 8px;
+    font-size: 14px;
+    color: var(--dark-text);
+  }
+
+  .foot {
+    padding-block: 32px 40px;
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  @media (max-width: 960px) {
+    .layout {
+      grid-template-columns: 1fr;
+    }
+
+    .aside {
+      position: static;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .form {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

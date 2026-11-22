@@ -1,0 +1,224 @@
+---
+import SplitHeading from './SplitHeading.astro';
+import { testimonials } from '../data/site';
+
+const shades = ['#14171f', '#c8174f', '#2b303b', '#4a5160'];
+---
+
+<section id="testimonials" class="section testimonials on-dark" data-slider>
+  <div class="container head">
+    <SplitHeading text="What clients say" class="h2" />
+    <div class="controls" data-reveal>
+      <span class="trust">In their words</span>
+      <div class="buttons">
+        <button type="button" class="arrow" data-slider-prev aria-label="Previous testimonial">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"></path></svg>
+        </button>
+        <button type="button" class="arrow" data-slider-next aria-label="Next testimonial">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"></path></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <ul class="track" data-slider-track data-lenis-prevent-horizontal>
+    {
+      testimonials.map((t, i) => (
+        <li class="slide" data-reveal style={`--d: ${Math.min(i, 3) * 0.08}s`}>
+          <figure>
+            <svg class="mark" viewBox="0 0 48 36" aria-hidden="true">
+              <path d="M0 36V22C0 9 7 2 20 0l2 5c-7 2-10 6-10 12h9v19H0zm26 0V22C26 9 33 2 46 0l2 5c-7 2-10 6-10 12h9v19H26z" />
+            </svg>
+            <blockquote>{t.quote}</blockquote>
+            <figcaption>
+              <span class="avatar" style={`background: ${shades[i % shades.length]}`} aria-hidden="true">
+                {t.initials}
+              </span>
+              <span class="who">
+                <strong>{t.name}</strong>
+                <span>{t.role}</span>
+              </span>
+            </figcaption>
+          </figure>
+        </li>
+      ))
+    }
+  </ul>
+
+  <div class="container">
+    <div class="progress" aria-hidden="true"><span data-slider-bar></span></div>
+  </div>
+</section>
+
+<style>
+  .testimonials {
+    background: var(--ink);
+    color: var(--paper);
+    overflow: hidden;
+  }
+
+  .head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px 48px;
+  }
+
+  .controls {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .trust {
+    font-size: 16px;
+    color: var(--dark-text);
+  }
+
+  .buttons {
+    display: flex;
+    gap: 10px;
+  }
+
+  .arrow {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: 1px solid #4a5160;
+    background: transparent;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition:
+      background-color 0.25s,
+      border-color 0.25s,
+      opacity 0.25s;
+  }
+
+  .arrow svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .arrow:hover:not(:disabled) {
+    background: var(--paper);
+    border-color: var(--paper);
+    color: var(--ink);
+  }
+
+  .arrow:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+
+  .track {
+    margin-top: clamp(48px, 6vw, 72px);
+    display: flex;
+    gap: 24px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--gutter);
+    padding-inline: max(var(--gutter), calc((100vw - var(--maxw)) / 2 + var(--gutter)));
+    scrollbar-width: none;
+    cursor: grab;
+  }
+
+  .track::-webkit-scrollbar {
+    display: none;
+  }
+
+  .track:global(.is-dragging) {
+    cursor: grabbing;
+    scroll-snap-type: none;
+    user-select: none;
+  }
+
+  .slide {
+    flex: 0 0 min(560px, 84vw);
+    scroll-snap-align: start;
+  }
+
+  figure {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    padding: clamp(28px, 3vw, 44px);
+    border-radius: 24px;
+    background: #1d212b;
+    box-shadow: inset 0 0 0 1px #2a2f3b;
+    transition: background-color 0.4s;
+  }
+
+  .slide:hover figure {
+    background: #232835;
+  }
+
+  .mark {
+    width: 40px;
+    fill: var(--accent);
+  }
+
+  blockquote {
+    font-size: clamp(19px, 1.6vw, 23px);
+    line-height: 1.5;
+    text-wrap: pretty;
+  }
+
+  figcaption {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .avatar {
+    flex: 0 0 auto;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 13px;
+    font-weight: 650;
+    color: #fff;
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.12);
+  }
+
+  .who {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .who strong {
+    font-size: 16px;
+    font-weight: 650;
+  }
+
+  .who span {
+    font-size: 14px;
+    color: var(--dark-text);
+  }
+
+  .progress {
+    margin-top: 40px;
+    height: 2px;
+    background: var(--dark-rule);
+    overflow: hidden;
+  }
+
+  .progress span {
+    display: block;
+    height: 100%;
+    background: var(--paper);
+    transform-origin: 0 50%;
+    transform: scaleX(0.15);
+    transition: transform 0.3s var(--ease-out);
+  }
+</style>

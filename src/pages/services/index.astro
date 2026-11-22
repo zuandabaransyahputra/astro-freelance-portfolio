@@ -1,0 +1,198 @@
+---
+import Base from '../../layouts/Base.astro';
+import SplitHeading from '../../components/SplitHeading.astro';
+import Button from '../../components/Button.astro';
+import HireInfo from '../../components/HireInfo.astro';
+import ContactBand from '../../components/ContactBand.astro';
+import { projects } from '../../data/projects';
+import { config, faqSchema, hero, services } from '../../data/site';
+
+const site = Astro.site!.toString();
+const schema = [
+  {
+    '@type': 'CollectionPage',
+    name: 'Web development services',
+    url: new URL('/services', site).toString(),
+    about: { '@id': `${site}#service` },
+    hasPart: services.map((s) => ({
+      '@type': 'Service',
+      name: s.headline,
+      url: new URL(`/services/${s.slug}`, site).toString(),
+      provider: { '@id': `${site}#person` },
+    })),
+  },
+  faqSchema,
+];
+---
+
+<Base
+  title="Freelance Web Development Services"
+  description={`Hire ${config.shortName} for Next.js, React and Astro websites, headless CMS builds (Payload, Sanity, Strapi), and Stripe, API and AI integrations. Remote, for clients worldwide.`}
+  schema={schema}
+>
+  <section class="container intro">
+    <SplitHeading as="h1" text="Services" class="display" />
+    <p class="lede" data-reveal>
+      I build fast websites and web apps for founders and teams, and stay on to grow them. Most projects mix all three of
+      these.
+    </p>
+    <ul class="proof" data-reveal>
+      {
+        hero.proof.map((item) => (
+          <li>
+            <strong>{item.title}</strong> {item.detail}
+          </li>
+        ))
+      }
+    </ul>
+    <div class="actions" data-reveal>
+      <Button href="/contact">Start a project</Button>
+      {
+        config.secondaryCta && (
+          <Button href={config.secondaryCta.href} variant="ghost" external>
+            {config.secondaryCta.label}
+          </Button>
+        )
+      }
+    </div>
+  </section>
+
+  <section class="container list" aria-label="Services">
+    {
+      services.map((s, i) => (
+        <a href={`/services/${s.slug}`} class="service" data-reveal style={`--d: ${i * 0.1}s`}>
+          <span class="service__n">{String(i + 1).padStart(2, '0')}</span>
+          <div class="service__body">
+            <h2>{s.headline}</h2>
+            <p>{s.intro}</p>
+            <ul>
+              {s.items.map((item) => (
+                <li>{item}</li>
+              ))}
+            </ul>
+          </div>
+          <span class="service__more">
+            {projects.filter((p) => p.category === s.category).length} projects <span aria-hidden="true">→</span>
+          </span>
+        </a>
+      ))
+    }
+  </section>
+
+  <HireInfo />
+
+  <ContactBand slot="after" />
+</Base>
+
+<style>
+  .intro {
+    display: grid;
+    gap: clamp(24px, 3vw, 40px);
+    padding-top: clamp(48px, 7vw, 112px);
+    padding-bottom: clamp(48px, 6vw, 88px);
+  }
+
+  .intro .lede {
+    max-width: 58ch;
+  }
+
+  .proof {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 32px;
+    list-style: none;
+    font-size: 16px;
+    color: var(--muted);
+  }
+
+  .proof strong {
+    color: var(--ink);
+    font-weight: 650;
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .list {
+    display: grid;
+    padding-bottom: var(--section);
+    border-top: 1px solid var(--rule);
+  }
+
+  .service {
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr) auto;
+    gap: 16px 32px;
+    padding: clamp(32px, 4vw, 56px) 0;
+    border-bottom: 1px solid var(--rule);
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .service__n {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--accent);
+    padding-top: 0.5em;
+  }
+
+  .service__body {
+    display: grid;
+    gap: 16px;
+  }
+
+  .service h2 {
+    font-size: clamp(28px, 3.2vw, 48px);
+    line-height: 1.05;
+    font-weight: 640;
+    font-stretch: 120%;
+    letter-spacing: -0.03em;
+    transition: transform 0.6s var(--ease-out);
+  }
+
+  .service:hover h2 {
+    transform: translateX(10px);
+  }
+
+  .service p {
+    max-width: 64ch;
+    font-size: clamp(17px, 1.3vw, 19px);
+    line-height: 1.55;
+    color: var(--text-2);
+  }
+
+  .service ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    list-style: none;
+  }
+
+  .service li {
+    padding: 8px 14px;
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 550;
+  }
+
+  .service__more {
+    align-self: end;
+    font-size: 15px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 700px) {
+    .service {
+      grid-template-columns: 1fr;
+    }
+
+    .service__n {
+      padding-top: 0;
+    }
+  }
+</style>

@@ -1,0 +1,408 @@
+---
+import { Picture } from 'astro:assets';
+import Button from './Button.astro';
+import { config, hero, portraitImage } from '../data/site';
+
+const words = hero.headline.split(' ');
+const badgeText = `${config.availability.short.toLowerCase()} · `.repeat(2).trim();
+---
+
+<section id="top" class="hero container">
+  <div class="headline-wrap">
+    <h1 class="headline" aria-label={hero.headline}>
+      {
+        words.map((word, i) => (
+          <>
+            <span class="mask" aria-hidden="true">
+              <span class="word" style={`--i: ${i}`}>
+                {word}
+              </span>
+            </span>{' '}
+          </>
+        ))
+      }
+    </h1>
+
+    <!-- Design-tool selection box: decoration only. -->
+    <div class="redline" aria-hidden="true">
+      <span class="redline__tag">h1</span>
+      <span class="redline__handle" style="top: -5px; left: -5px"></span>
+      <span class="redline__handle" style="top: -5px; right: -5px"></span>
+      <span class="redline__handle" style="bottom: -5px; left: -5px"></span>
+      <span class="redline__handle" style="bottom: -5px; right: -5px"></span>
+    </div>
+  </div>
+
+  <div class="body">
+    <div class="measure" aria-hidden="true">
+      <span class="measure__line"></span>
+      <span class="measure__label">56</span>
+    </div>
+
+    <div class="intro">
+      <p class="intro__text">{hero.intro}</p>
+      <div class="intro__ctas">
+        <Button href="/contact">Start a project</Button>
+        <a href="/#work" class="link">See selected work</a>
+      </div>
+      <ul class="proof">
+        {
+          hero.proof.map((item) => (
+            <li>
+              <a href={item.href}>
+                <strong>{item.title}</strong>
+                <span>{item.detail}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+
+    <figure class="portrait">
+      <div class="portrait__tilt" data-parallax="-0.06">
+        <div class="portrait__frame">
+          <Picture
+            src={portraitImage.src}
+            alt={portraitImage.alt}
+            formats={['avif', 'webp']}
+            widths={[360, 560, 760, 1000]}
+            sizes="(max-width: 760px) 90vw, 360px"
+            loading="eager"
+            fetchpriority="high"
+            class="portrait__img"
+          />
+        </div>
+        <span class="portrait__badge" aria-hidden="true">
+          <svg viewBox="0 0 120 120">
+            <defs>
+              <path id="badge-circle" d="M60,60 m-44,0 a44,44 0 1,1 88,0 a44,44 0 1,1 -88,0"></path>
+            </defs>
+            <text>
+              <textPath href="#badge-circle" textLength="272" lengthAdjust="spacing"
+                >{badgeText}</textPath
+              >
+            </text>
+          </svg>
+          <span class="portrait__badge-dot"></span>
+        </span>
+      </div>
+      <figcaption class="portrait__caption">
+        <span>{config.location.city}, {config.location.country}</span>
+        <span data-local-time data-suffix={` local time, ${config.utcOffset}`}>{config.utcOffset}</span>
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
+<style>
+  .hero {
+    padding-top: clamp(40px, 6vw, 96px);
+    padding-bottom: clamp(72px, 8vw, 120px);
+  }
+
+  .headline-wrap {
+    position: relative;
+  }
+
+  .headline {
+    font-size: clamp(40px, 7vw, 112px);
+    line-height: 0.96;
+    font-weight: 660;
+    font-stretch: 125%;
+    letter-spacing: -0.04em;
+    text-wrap: balance;
+  }
+
+  .mask {
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: top;
+    padding-bottom: 0.12em;
+    margin-bottom: -0.12em;
+  }
+
+  .word {
+    display: inline-block;
+    animation: rise 1.1s var(--ease-out) both;
+    animation-delay: calc(0.15s + var(--i) * 0.07s);
+  }
+
+  @keyframes rise {
+    from {
+      transform: translateY(110%) rotate(4deg);
+    }
+    to {
+      transform: none;
+    }
+  }
+
+  .redline {
+    position: absolute;
+    inset: 0;
+    border: 1px solid var(--accent);
+    pointer-events: none;
+    animation: draw 1.1s var(--ease-out) 1s both;
+  }
+
+  @keyframes draw {
+    from {
+      clip-path: inset(-40px 100% 100% -40px);
+    }
+    to {
+      clip-path: inset(-40px);
+    }
+  }
+
+  .redline__tag {
+    position: absolute;
+    top: -26px;
+    left: -1px;
+    height: 22px;
+    padding: 0 8px;
+    display: flex;
+    align-items: center;
+    border-radius: 3px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    font-stretch: 85%;
+    line-height: 1;
+  }
+
+  .redline__handle {
+    position: absolute;
+    width: 9px;
+    height: 9px;
+    background: #fff;
+    border: 1px solid var(--accent);
+  }
+
+  .body {
+    position: relative;
+    margin-top: 56px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 48px 64px;
+  }
+
+  /* The 56 is the real gap between the h1 box and this row. */
+  .measure {
+    position: absolute;
+    left: 32px;
+    top: -56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    pointer-events: none;
+    animation: fade 0.6s ease-out 1.8s both;
+  }
+
+  @keyframes fade {
+    from {
+      opacity: 0;
+    }
+  }
+
+  .measure__line {
+    width: 9px;
+    height: 56px;
+    background: linear-gradient(var(--accent), var(--accent)) center / 1px 100% no-repeat;
+    border-block: 1px solid var(--accent);
+  }
+
+  .measure__label {
+    padding: 3px 6px;
+    border-radius: 3px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    font-stretch: 85%;
+    line-height: 1.2;
+  }
+
+  .intro {
+    flex: 1 1 520px;
+    max-width: 640px;
+    display: flex;
+    flex-direction: column;
+    gap: 36px;
+    animation: fade-up 1s var(--ease-out) 0.75s both;
+  }
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(24px);
+    }
+  }
+
+  .intro__text {
+    font-size: clamp(18px, 1.5vw, 21px);
+    color: var(--text-2);
+    text-wrap: pretty;
+  }
+
+  .intro__ctas {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px 28px;
+  }
+
+  .intro__ctas .link {
+    font-size: 17px;
+  }
+
+
+  .proof {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px 40px;
+    padding-top: 28px;
+    border-top: 1px solid var(--rule);
+  }
+
+  .proof a {
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+  }
+
+  .proof a:hover strong {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .proof strong {
+    font-size: 16px;
+    font-weight: 650;
+  }
+
+  .proof span {
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  .portrait {
+    flex: 0 1 360px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .portrait__tilt {
+    position: relative;
+  }
+
+  .portrait__frame {
+    aspect-ratio: 4 / 5;
+    border-radius: 18px;
+    overflow: hidden;
+    background: #d9dde2;
+    box-shadow: 0 50px 90px -50px rgb(20 23 31 / 0.6);
+    animation: photo-in 1.3s var(--ease-out) 0.35s both;
+  }
+
+  .portrait__frame :global(picture) {
+    height: 100%;
+  }
+
+  .portrait__frame :global(.portrait__img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 25%;
+    animation: photo-zoom 2s var(--ease-out) 0.35s both;
+  }
+
+  @keyframes photo-in {
+    from {
+      clip-path: inset(100% 0 0 0 round 18px);
+    }
+    to {
+      clip-path: inset(0 0 0 0 round 18px);
+    }
+  }
+
+  @keyframes photo-zoom {
+    from {
+      transform: scale(1.2);
+    }
+  }
+
+  /* Rotating "open for new projects" badge overlapping the portrait. */
+  .portrait__badge {
+    position: absolute;
+    left: -44px;
+    bottom: 36px;
+    width: 112px;
+    height: 112px;
+    border-radius: 50%;
+    background: var(--paper);
+    box-shadow: 0 20px 40px -20px rgb(20 23 31 / 0.45);
+    display: grid;
+    place-items: center;
+    animation: badge-in 0.8s var(--ease-out) 1.4s both;
+  }
+
+  .portrait__badge svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    animation: spin 18s linear infinite;
+  }
+
+  .portrait__badge text {
+    font-size: 9.5px;
+    font-weight: 600;
+    fill: var(--ink);
+  }
+
+  .portrait__badge-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--ok);
+    animation: ping 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes badge-in {
+    from {
+      opacity: 0;
+      transform: scale(0.4) rotate(-90deg);
+    }
+  }
+
+  .portrait__caption {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 4px 12px;
+    font-size: 14px;
+    color: var(--text-2);
+    animation: fade 0.8s ease-out 1.2s both;
+  }
+
+  @media (max-width: 760px) {
+    .portrait__badge {
+      left: auto;
+      right: 16px;
+      bottom: 16px;
+      width: 96px;
+      height: 96px;
+    }
+  }
+</style>

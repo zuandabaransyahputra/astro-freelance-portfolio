@@ -1,0 +1,457 @@
+---
+import Base from '../../layouts/Base.astro';
+import SplitHeading from '../../components/SplitHeading.astro';
+import ProjectMedia from '../../components/ProjectMedia.astro';
+import Button from '../../components/Button.astro';
+import ContactBand from '../../components/ContactBand.astro';
+import { categoryLabel, projects, type Project } from '../../data/projects';
+import { testimonials } from '../../data/site';
+
+export function getStaticPaths() {
+  const withCase = projects.filter((p) => p.caseStudy);
+  return withCase.map((project, i) => ({
+    params: { slug: project.slug },
+    props: { project, next: withCase[(i + 1) % withCase.length] },
+  }));
+}
+
+interface Props {
+  project: Project;
+  next: Project;
+}
+
+const { project, next } = Astro.props;
+const cs = project.caseStudy!;
+const quote = testimonials.find((t) => t.project === project.slug);
+
+const site = Astro.site!.toString();
+const pageUrl = new URL(`/work/${project.slug}`, site).toString();
+const schema = [
+  {
+    '@type': 'CreativeWork',
+    '@id': `${pageUrl}#work`,
+    name: `${project.title} — ${project.industry}`,
+    headline: project.title,
+    description: project.summary,
+    url: pageUrl,
+    image: new URL(project.image.src, site).toString(),
+    dateCreated: project.year,
+    keywords: project.tags.join(', '),
+    genre: categoryLabel(project.category),
+    creator: { '@id': `${site}#person` },
+    sourceOrganization: { '@type': 'Organization', name: project.client, ...(project.url && { url: project.url }) },
+  },
+  {
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: site },
+      { '@type': 'ListItem', position: 2, name: 'Work', item: new URL('/works', site).toString() },
+      { '@type': 'ListItem', position: 3, name: project.title, item: pageUrl },
+    ],
+  },
+];
+
+const sections = [
+  { id: 'overview', label: 'Overview' },
+  { id: 'challenge', label: 'The challenge' },
+  { id: 'approach', label: 'The approach' },
+  { id: 'build', label: 'The build' },
+  { id: 'results', label: 'Results' },
+];
+---
+
+<Base
+  title={`${project.title} case study`}
+  description={project.summary}
+  image={project.image}
+  imageAlt={`${project.title} website screenshot`}
+  schema={schema}
+>
+  <article>
+    <header class="container intro">
+      <nav class="crumbs" aria-label="Breadcrumb" data-reveal="fade">
+        <a href="/works">Work</a>
+        <span aria-hidden="true">/</span>
+        <a href={`/works?filter=${project.category}`}>{categoryLabel(project.category)}</a>
+      </nav>
+      <SplitHeading as="h1" text={project.title} class="display" />
+      <div class="intro__row">
+        <p class="lede" data-reveal>{project.summary}</p>
+        {
+          project.url && (
+            <div data-reveal>
+              <Button href={project.url} variant="ink" external>
+                Visit live site
+              </Button>
+            </div>
+          )
+        }
+      </div>
+      <dl class="meta" data-reveal>
+        <div><dt>Client</dt><dd>{project.client}</dd></div>
+        <div><dt>Industry</dt><dd>{project.industry}</dd></div>
+        <div><dt>Year</dt><dd>{project.year}</dd></div>
+        <div>
+          <dt>Scope</dt>
+          <dd>{project.tags.join(', ')}</dd>
+        </div>
+      </dl>
+    </header>
+
+    <div class="container hero-media">
+      <ProjectMedia project={project} size="hero" eager transitionName={`media-${project.slug}`} />
+    </div>
+
+    <div class="container body">
+      <aside class="toc" aria-label="On this page">
+        <ul data-toc>
+          {
+            sections.map((s) => (
+              <li>
+                <a href={`#${s.id}`}>{s.label}</a>
+              </li>
+            ))
+          }
+        </ul>
+      </aside>
+
+      <div class="content">
+        <section id="overview" class="block">
+          <h2 data-reveal>Overview</h2>
+          <p class="big" data-reveal>{cs.overview}</p>
+        </section>
+
+        <section id="challenge" class="block">
+          <h2 data-reveal>The challenge</h2>
+          <p data-reveal>{cs.challenge}</p>
+        </section>
+
+        {
+          project.detail && (
+            <figure class="figure" data-reveal="scale">
+              <ProjectMedia project={project} image={project.detail} size="figure" />
+              <figcaption>{cs.caption}</figcaption>
+            </figure>
+          )
+        }
+
+        <section id="approach" class="block">
+          <h2 data-reveal>The approach</h2>
+          <p data-reveal>{cs.approach}</p>
+        </section>
+
+        <section id="build" class="block">
+          <h2 data-reveal>The build</h2>
+          <p data-reveal>{cs.build}</p>
+        </section>
+
+        <section id="results" class="block">
+          <h2 data-reveal>Results</h2>
+          <ul class="results">
+            {
+              cs.results.map((r, i) => (
+                <li data-reveal style={`--d: ${i * 0.1}s`}>
+                  <span class="results__dot" aria-hidden="true" />
+                  {r}
+                </li>
+              ))
+            }
+          </ul>
+        </section>
+
+        {
+          quote && (
+            <figure class="quote" data-reveal>
+              <blockquote>“{quote.quote}”</blockquote>
+              <figcaption>
+                <strong>{quote.name}</strong>
+                <span>{quote.role}</span>
+              </figcaption>
+            </figure>
+          )
+        }
+      </div>
+    </div>
+  </article>
+
+  <a href={`/work/${next.slug}`} class="next card" data-cursor="Next">
+    <div class="container next__inner">
+      <div class="next__text">
+        <span class="next__label">Next project</span>
+        <span class="next__title">{next.title}</span>
+        <span class="next__summary">{next.summary}</span>
+      </div>
+      <div class="next__media">
+        <ProjectMedia project={next} parallax={false} transitionName={`media-${next.slug}`} />
+      </div>
+    </div>
+  </a>
+
+  <ContactBand slot="after" title="Have a project like this in mind?" />
+</Base>
+
+<style>
+  .intro {
+    padding-top: clamp(40px, 6vw, 96px);
+    padding-bottom: clamp(40px, 5vw, 72px);
+  }
+
+  .crumbs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: clamp(20px, 2vw, 32px);
+    font-size: 15px;
+    color: var(--muted);
+  }
+
+  .crumbs a {
+    text-decoration: none;
+  }
+
+  .crumbs a:hover {
+    color: var(--ink);
+  }
+
+  .intro__row {
+    margin-top: clamp(24px, 3vw, 40px);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px 48px;
+  }
+
+  .meta {
+    margin-top: clamp(36px, 4vw, 56px);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+    gap: 20px 32px;
+  }
+
+  .meta div {
+    padding-top: 16px;
+    border-top: 1px solid var(--rule);
+  }
+
+  dt {
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  dd {
+    margin-top: 4px;
+    font-size: 17px;
+    font-weight: 600;
+  }
+
+  .hero-media {
+    margin-bottom: var(--section);
+  }
+
+  .body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 3fr);
+    gap: 48px clamp(32px, 5vw, 96px);
+    padding-bottom: var(--section);
+  }
+
+  .toc ul {
+    position: sticky;
+    top: calc(var(--header-h) + 32px);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-left: 16px;
+    border-left: 1px solid var(--rule);
+  }
+
+  .toc a {
+    position: relative;
+    display: block;
+    padding: 6px 0;
+    font-size: 15px;
+    color: var(--muted);
+    text-decoration: none;
+    transition:
+      color 0.25s,
+      transform 0.4s var(--ease-out);
+  }
+
+  .toc a::before {
+    content: '';
+    position: absolute;
+    left: -17px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--accent);
+    transform: scaleY(0);
+    transition: transform 0.4s var(--ease-out);
+  }
+
+  .toc a:hover,
+  .toc a:global(.is-active) {
+    color: var(--ink);
+  }
+
+  .toc a:global(.is-active) {
+    transform: translateX(4px);
+  }
+
+  .toc a:global(.is-active)::before {
+    transform: none;
+  }
+
+  .content {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(56px, 7vw, 104px);
+    max-width: 880px;
+  }
+
+  .block {
+    display: grid;
+    gap: 18px;
+    scroll-margin-top: calc(var(--header-h) + 32px);
+  }
+
+  .block h2 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--accent);
+  }
+
+  .block p {
+    font-size: clamp(19px, 1.6vw, 24px);
+    line-height: 1.5;
+    text-wrap: pretty;
+  }
+
+  .block .big {
+    font-size: clamp(26px, 2.6vw, 40px);
+    line-height: 1.22;
+    font-weight: 560;
+    font-stretch: 108%;
+    letter-spacing: -0.02em;
+  }
+
+  .figure figcaption {
+    margin-top: 14px;
+    font-size: 15px;
+    color: var(--muted);
+  }
+
+  .results {
+    display: grid;
+    gap: 12px;
+  }
+
+  .results li {
+    display: flex;
+    align-items: flex-start;
+    gap: 18px;
+    padding: 22px 24px;
+    border-radius: 18px;
+    background: var(--surface);
+    font-size: clamp(18px, 1.5vw, 22px);
+    font-weight: 560;
+    line-height: 1.35;
+  }
+
+  .results__dot {
+    flex: 0 0 auto;
+    width: 12px;
+    height: 12px;
+    margin-top: 0.45em;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  .quote {
+    padding: clamp(28px, 3.4vw, 48px);
+    border-radius: 24px;
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  .quote blockquote {
+    font-size: clamp(22px, 2.2vw, 32px);
+    line-height: 1.35;
+    font-weight: 520;
+    letter-spacing: -0.01em;
+    text-wrap: pretty;
+  }
+
+  .quote figcaption {
+    margin-top: 24px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .quote figcaption span {
+    font-size: 15px;
+    color: var(--dark-text);
+  }
+
+  .next {
+    display: block;
+    border-top: 1px solid var(--rule);
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .next:hover {
+    color: inherit;
+  }
+
+  .next__inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: center;
+    gap: 32px clamp(32px, 5vw, 80px);
+    padding-block: clamp(56px, 7vw, 112px);
+  }
+
+  .next__text {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .next__label {
+    font-size: 15px;
+    color: var(--muted);
+  }
+
+  .next__title {
+    font-size: clamp(48px, 7vw, 112px);
+    line-height: 0.92;
+    font-weight: 660;
+    font-stretch: 125%;
+    letter-spacing: -0.045em;
+    transition: transform 0.7s var(--ease-out);
+  }
+
+  .next:hover .next__title {
+    transform: translateX(16px);
+  }
+
+  .next__summary {
+    max-width: 44ch;
+    color: var(--text-2);
+  }
+
+  @media (max-width: 900px) {
+    .body {
+      grid-template-columns: 1fr;
+    }
+
+    .toc {
+      display: none;
+    }
+
+    .next__inner {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -1,0 +1,181 @@
+---
+import Base from '../../layouts/Base.astro';
+import SplitHeading from '../../components/SplitHeading.astro';
+import Button from '../../components/Button.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import HireInfo from '../../components/HireInfo.astro';
+import ContactBand from '../../components/ContactBand.astro';
+import { projects } from '../../data/projects';
+import { config, faqSchema, services } from '../../data/site';
+
+export function getStaticPaths() {
+  return services.map((service) => ({ params: { slug: service.slug }, props: { service } }));
+}
+
+interface Props {
+  service: (typeof services)[number];
+}
+
+const { service } = Astro.props;
+const work = projects.filter((p) => p.category === service.category);
+const others = services.filter((s) => s !== service);
+
+const site = Astro.site!.toString();
+const pageUrl = new URL(`/services/${service.slug}`, site).toString();
+const schema = [
+  {
+    '@type': 'Service',
+    '@id': `${pageUrl}#service`,
+    name: service.headline,
+    serviceType: service.title,
+    description: service.intro,
+    url: pageUrl,
+    provider: { '@id': `${site}#person` },
+    areaServed: 'Worldwide',
+    availableChannel: { '@type': 'ServiceChannel', serviceUrl: new URL('/contact', site).toString() },
+    hasOfferCatalog: {
+      '@type': 'OfferCatalog',
+      name: service.title,
+      itemListElement: service.items.map((name) => ({ '@type': 'Offer', itemOffered: { '@type': 'Service', name } })),
+    },
+  },
+  faqSchema,
+  {
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: site },
+      { '@type': 'ListItem', position: 2, name: 'Services', item: new URL('/services', site).toString() },
+      { '@type': 'ListItem', position: 3, name: service.title, item: pageUrl },
+    ],
+  },
+];
+---
+
+<Base title={service.seoTitle} description={`${service.description} Remote, worldwide — ${config.name}, ${config.role.toLowerCase()}.`} schema={schema}>
+  <section class="container intro">
+    <nav class="crumbs" aria-label="Breadcrumb" data-reveal="fade">
+      <a href="/services">Services</a>
+      <span aria-hidden="true">/</span>
+      <span>{service.title}</span>
+    </nav>
+    <SplitHeading as="h1" text={service.headline} class="h1" />
+    <p class="lede" data-reveal>{service.intro}</p>
+    <div class="actions" data-reveal>
+      <Button href="/contact">Start a project</Button>
+      {
+        config.secondaryCta && (
+          <Button href={config.secondaryCta.href} variant="ghost" external>
+            {config.secondaryCta.label}
+          </Button>
+        )
+      }
+    </div>
+    <ul class="items" data-reveal>
+      {service.items.map((item) => <li>{item}</li>)}
+    </ul>
+  </section>
+
+  {
+    work.length > 0 && (
+      <section class="container work" aria-labelledby="work-title">
+        <div class="section-head">
+          <h2 id="work-title" class="h2" data-reveal>
+            Related work
+          </h2>
+          <a href={service.link.href} class="link" data-reveal>
+            {service.link.label}
+          </a>
+        </div>
+        <div class="grid">
+          {work.map((project, i) => <ProjectCard project={project} index={i} />)}
+        </div>
+      </section>
+    )
+  }
+
+  <HireInfo />
+
+  <nav class="container more" aria-label="Other services">
+    <span>Other services</span>
+    {others.map((s) => <a href={`/services/${s.slug}`} class="link">{s.headline}</a>)}
+  </nav>
+
+  <ContactBand slot="after" />
+</Base>
+
+<style>
+  .intro {
+    display: grid;
+    gap: clamp(24px, 3vw, 40px);
+    padding-top: clamp(48px, 7vw, 112px);
+    padding-bottom: var(--section);
+  }
+
+  .crumbs {
+    display: flex;
+    gap: 10px;
+    font-size: 15px;
+    color: var(--muted);
+  }
+
+  .crumbs a {
+    text-decoration: none;
+  }
+
+  .crumbs a:hover {
+    color: var(--ink);
+  }
+
+  .intro .h1 {
+    max-width: 18ch;
+  }
+
+  .intro .lede {
+    max-width: 62ch;
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    list-style: none;
+  }
+
+  .items li {
+    padding: 10px 18px;
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    font-size: 15px;
+    font-weight: 550;
+  }
+
+  .work {
+    padding-bottom: var(--section);
+  }
+
+  .grid {
+    margin-top: clamp(40px, 5vw, 64px);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(480px, 100%), 1fr));
+    gap: clamp(56px, 6vw, 88px) clamp(24px, 3vw, 40px);
+  }
+
+  .more {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 12px 32px;
+    padding-bottom: var(--section);
+  }
+
+  .more span {
+    font-size: 15px;
+    color: var(--muted);
+  }
+</style>

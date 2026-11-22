@@ -1,0 +1,221 @@
+---
+import Button from './Button.astro';
+import ProjectMedia from './ProjectMedia.astro';
+import SplitHeading from './SplitHeading.astro';
+import { categoryLabel, featuredSlugs, projects } from '../data/projects';
+
+const featured = featuredSlugs.map((slug) => projects.find((p) => p.slug === slug)!).filter(Boolean);
+---
+
+<section id="work" class="container section work">
+  <div class="section-head">
+    <SplitHeading text="Selected work" class="h2" />
+    <p class="lede" data-reveal>
+      From a coffee subscription shop to an analytics dashboard that answers questions in plain language.
+    </p>
+  </div>
+
+  <div class="stack">
+    {
+      featured.map((p, i) => (
+        <article class="stack-card card" data-stack-card data-tone={p.tone} style={`--i: ${i}; --tint: ${p.tint}`}>
+          <div class="inner">
+            <div class="text">
+              <p class="meta">
+                <span>{categoryLabel(p.category)}</span>
+                <span>{p.year}</span>
+              </p>
+              <h3 class="title">
+                <a href={`/work/${p.slug}`}>{p.title}</a>
+              </h3>
+              <p class="summary">{p.summary}</p>
+              <ul class="chips">
+                {p.tags.map((tag) => (
+                  <li>{tag}</li>
+                ))}
+              </ul>
+              <div class="cta">
+                <Button href={`/work/${p.slug}`} variant={p.tone === 'dark' ? 'paper' : 'ink'}>
+                  View case study
+                </Button>
+              </div>
+            </div>
+            <a href={`/work/${p.slug}`} class="media-link" tabindex="-1" aria-hidden="true" data-cursor="View">
+              <ProjectMedia project={p} size="stack" parallax={false} transitionName={`media-${p.slug}`} />
+            </a>
+          </div>
+        </article>
+      ))
+    }
+  </div>
+
+  <div class="all" data-reveal>
+    <a href="/works" class="all__link" data-cursor="Open">
+      <span class="all__label">See all {projects.length} projects</span>
+      <span class="all__count" aria-hidden="true">{projects.length}</span>
+    </a>
+  </div>
+</section>
+
+<style>
+  .section-head {
+    margin-bottom: clamp(48px, 6vw, 80px);
+  }
+
+  .stack {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
+
+  .stack-card {
+    position: sticky;
+    top: calc(var(--header-h) + 20px + var(--i) * 14px);
+  }
+
+  .inner {
+    height: clamp(540px, 78vh, 760px);
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: clamp(24px, 3vw, 48px);
+    padding: clamp(24px, 3.2vw, 48px);
+    border-radius: 28px;
+    background:
+      radial-gradient(90% 70% at 0% 0%, rgb(255 255 255 / 0.16), transparent 60%),
+      var(--tint);
+    color: var(--ink);
+    transform-origin: 50% 0%;
+    will-change: transform, filter;
+    box-shadow: 0 -20px 60px -30px rgb(20 23 31 / 0.35);
+  }
+
+  [data-tone='dark'] .inner {
+    color: #f6f6f8;
+  }
+
+  .text {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding-block: 8px;
+  }
+
+  .meta {
+    display: flex;
+    gap: 16px;
+    font-size: 14px;
+    font-weight: 550;
+    opacity: 0.75;
+  }
+
+  .title {
+    margin-top: auto;
+    font-size: clamp(40px, 5vw, 80px);
+    line-height: 0.95;
+    font-weight: 660;
+    font-stretch: 125%;
+    letter-spacing: -0.04em;
+  }
+
+  .title a {
+    text-decoration: none;
+  }
+
+  .title a:hover {
+    color: inherit;
+  }
+
+  .summary {
+    max-width: 42ch;
+    font-size: clamp(16px, 1.25vw, 18px);
+    line-height: 1.55;
+    opacity: 0.88;
+    text-wrap: pretty;
+  }
+
+  [data-tone='dark'] .chips li {
+    background: rgb(255 255 255 / 0.14);
+    color: #fff;
+  }
+
+  .stack-card:not([data-tone='dark']) .chips li {
+    background: rgb(20 23 31 / 0.08);
+  }
+
+  .cta {
+    margin-top: 8px;
+  }
+
+  .media-link {
+    display: block;
+    min-height: 0;
+  }
+
+  .all {
+    margin-top: clamp(48px, 6vw, 88px);
+  }
+
+  .all__link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: clamp(24px, 3vw, 40px) 0;
+    border-block: 1px solid var(--rule);
+    text-decoration: none;
+    font-size: clamp(32px, 5vw, 76px);
+    font-weight: 640;
+    font-stretch: 125%;
+    letter-spacing: -0.035em;
+    line-height: 1;
+    transition: color 0.3s;
+  }
+
+  .all__label {
+    transition: transform 0.6s var(--ease-out);
+  }
+
+  .all__link:hover .all__label {
+    transform: translateX(16px);
+  }
+
+  .all__count {
+    display: grid;
+    place-items: center;
+    width: clamp(56px, 6vw, 88px);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: var(--ink);
+    color: var(--paper);
+    font-size: clamp(18px, 1.8vw, 26px);
+    letter-spacing: 0;
+    transition:
+      transform 0.6s var(--ease-out),
+      background-color 0.3s;
+  }
+
+  .all__link:hover .all__count {
+    transform: rotate(-12deg) scale(1.08);
+    background: var(--accent);
+  }
+
+  @media (max-width: 900px) {
+    .stack-card {
+      position: relative;
+      top: 0;
+    }
+
+    .inner {
+      height: auto;
+      grid-template-columns: 1fr;
+    }
+
+    .title {
+      margin-top: 12px;
+    }
+
+    .media-link {
+      height: 320px;
+    }
+  }
+</style>

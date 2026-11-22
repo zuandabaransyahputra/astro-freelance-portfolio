@@ -1,0 +1,119 @@
+---
+import Base from '../layouts/Base.astro';
+import SplitHeading from '../components/SplitHeading.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import ContactBand from '../components/ContactBand.astro';
+import { categories, projects } from '../data/projects';
+import { config } from '../config';
+
+const counts = Object.fromEntries(categories.map((c) => [c.id, projects.filter((p) => p.category === c.id).length]));
+---
+
+<Base
+  title="Web Development Projects & Case Studies"
+  description={`Websites, headless CMS builds, AI products and apps by ${config.name}, ${config.role.toLowerCase()} — for founders and teams worldwide.`}
+>
+  <div data-filter-root>
+    <section class="container intro">
+      <SplitHeading as="h1" text="Work" class="display" />
+      <div class="intro__row">
+        <p class="lede" data-reveal>
+          Websites, headless CMS builds, AI products and apps — for founders and teams around the world.
+        </p>
+        <span class="count" data-reveal>{projects.length} projects</span>
+      </div>
+
+      <div class="filters" role="group" aria-label="Filter projects" data-reveal>
+        <button type="button" data-filter="all" aria-pressed="true">
+          All <span>{projects.length}</span>
+        </button>
+        {
+          categories.map((c) => (
+            <button type="button" data-filter={c.id} aria-pressed="false">
+              {c.label} <span>{counts[c.id]}</span>
+            </button>
+          ))
+        }
+      </div>
+    </section>
+
+    <section class="container grid" aria-label="Projects">
+      {projects.map((project, i) => <ProjectCard project={project} index={i} />)}
+    </section>
+  </div>
+
+  <ContactBand slot="after" title="Have a project like these in mind?" />
+</Base>
+
+<style>
+  .intro {
+    padding-top: clamp(48px, 7vw, 112px);
+    padding-bottom: clamp(40px, 5vw, 64px);
+  }
+
+  .intro__row {
+    margin-top: clamp(24px, 3vw, 40px);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px 48px;
+  }
+
+  .count {
+    font-size: 16px;
+    color: var(--muted);
+  }
+
+  .filters {
+    margin-top: clamp(36px, 4vw, 56px);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .filters button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 18px;
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    background: transparent;
+    font-size: 15px;
+    font-weight: 550;
+    cursor: pointer;
+    transition:
+      background-color 0.25s,
+      color 0.25s,
+      border-color 0.25s;
+  }
+
+  .filters button span {
+    font-size: 12px;
+    color: var(--muted);
+    transition: color 0.25s;
+  }
+
+  .filters button:hover {
+    border-color: var(--ink);
+  }
+
+  .filters button[aria-pressed='true'] {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--paper);
+  }
+
+  .filters button[aria-pressed='true'] span {
+    color: var(--dark-text);
+  }
+
+  .grid {
+    padding-bottom: var(--section);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(480px, 100%), 1fr));
+    gap: clamp(56px, 6vw, 88px) clamp(24px, 3vw, 40px);
+  }
+</style>

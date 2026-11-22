@@ -1,0 +1,113 @@
+---
+import { about } from '../data/site';
+
+const words = about.statement.split(' ');
+---
+
+<section id="about" class="container section about">
+  <div class="layout">
+    <p class="label" data-reveal>About</p>
+    <div class="content">
+      <p class="statement" data-highlight aria-label={about.statement}>
+        {
+          words.map((w) => (
+            <>
+              <span class="hw" aria-hidden="true">
+                {w}
+              </span>{' '}
+            </>
+          ))
+        }
+      </p>
+      <p class="detail" data-reveal>{about.detail}</p>
+      <dl class="facts">
+        {
+          about.facts.map((f, i) => (
+            <div data-reveal style={`--d: ${i * 0.1}s`}>
+              <dt>{f.label}</dt>
+              <dd>{f.value}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+  </div>
+</section>
+
+<style>
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 3fr);
+    gap: 32px 64px;
+  }
+
+  .label {
+    font-size: 16px;
+    font-weight: 600;
+    padding-top: 0.6em;
+  }
+
+  .statement {
+    font-size: clamp(28px, 3.4vw, 52px);
+    line-height: 1.16;
+    font-weight: 560;
+    font-stretch: 112%;
+    letter-spacing: -0.025em;
+  }
+
+  /* Each word lights up as the paragraph scrolls through the viewport. */
+  .hw {
+    transition: color 0.35s;
+  }
+
+  :global(.js) .hw {
+    color: #c3c8d0;
+  }
+
+  .hw:global(.on) {
+    color: var(--ink);
+  }
+
+  .detail {
+    margin-top: clamp(28px, 3vw, 44px);
+    max-width: 62ch;
+    font-size: clamp(17px, 1.3vw, 19px);
+    color: var(--text-2);
+    text-wrap: pretty;
+  }
+
+  .facts {
+    margin-top: clamp(36px, 4vw, 56px);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+    gap: 24px 40px;
+  }
+
+  .facts div {
+    padding-top: 16px;
+    border-top: 1px solid var(--rule);
+  }
+
+  dt {
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  dd {
+    margin-top: 4px;
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  @media (max-width: 860px) {
+    .layout {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hw {
+      color: var(--ink);
+    }
+  }
+</style>

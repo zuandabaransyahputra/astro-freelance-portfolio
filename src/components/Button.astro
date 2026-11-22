@@ -1,0 +1,50 @@
+---
+interface Props {
+  href?: string;
+  variant?: 'ink' | 'paper' | 'ghost';
+  size?: 'sm' | 'md';
+  type?: 'button' | 'submit';
+  name?: string;
+  value?: string;
+  external?: boolean;
+  magnetic?: boolean;
+  class?: string;
+}
+
+const {
+  href,
+  variant = 'ink',
+  size = 'md',
+  type = 'button',
+  name,
+  value,
+  external = false,
+  magnetic = true,
+  class: className,
+} = Astro.props;
+
+const text = (await Astro.slots.render('default')).trim();
+const classes = ['btn', `btn--${variant}`, size === 'sm' && 'btn--sm', className];
+---
+
+{
+  href ? (
+    <a
+      href={href}
+      class:list={classes}
+      data-magnetic={magnetic ? '' : undefined}
+      target={external ? '_blank' : undefined}
+      rel={external ? 'noopener' : undefined}
+    >
+      <span class="btn__label">
+        <span data-text={text} set:html={text} />
+      </span>
+    </a>
+  ) : (
+    <button type={type} name={name} value={value} class:list={classes} data-magnetic={magnetic ? '' : undefined}>
+      <span class="btn__label">
+        <span data-text={text} set:html={text} />
+      </span>
+    </button>
+  )
+}

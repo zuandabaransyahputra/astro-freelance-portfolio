@@ -1,0 +1,57 @@
+---
+import { config } from '../data/site';
+---
+
+<footer class="footer">
+  <span>
+    {config.location.city}, <span data-local-time data-suffix={` (${config.utcOffset})`}>{config.utcOffset}</span>
+  </span>
+  <nav aria-label="Elsewhere">
+    <ul>
+      {config.socials.map((s) => <li><a href={s.href}>{s.label}</a></li>)}
+      <li><a href="/privacy-policy">Privacy policy</a></li>
+    </ul>
+  </nav>
+  <span>
+    © {new Date().getFullYear()} {config.name}
+    {/* Template credit: appreciated, not required (MIT). Remove it if you like. */}
+    <span class="credit">· Template by <a href="https://zuanda.web.id">Zuanda Baransyah Putra</a></span>
+  </span>
+</footer>
+
+<style>
+  .footer {
+    padding-top: 28px;
+    border-top: 1px solid var(--dark-rule);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px 40px;
+    font-size: 15px;
+    color: var(--dark-text);
+  }
+
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 28px;
+  }
+
+  a {
+    text-decoration: none;
+  }
+
+  a:hover {
+    color: #fff;
+  }
+
+  .credit {
+    color: var(--dark-muted);
+  }
+
+  .credit a {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+</style>

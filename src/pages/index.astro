@@ -1,0 +1,41 @@
+---
+import Base from '../layouts/Base.astro';
+import Hero from '../components/Hero.astro';
+import ClientMarquee from '../components/ClientMarquee.astro';
+import Showreel from '../components/Showreel.astro';
+import FeaturedStack from '../components/FeaturedStack.astro';
+import Services from '../components/Services.astro';
+import About from '../components/About.astro';
+import Testimonials from '../components/Testimonials.astro';
+import InsightRows from '../components/InsightRows.astro';
+import SplitHeading from '../components/SplitHeading.astro';
+import ContactBand from '../components/ContactBand.astro';
+import { insights } from '../data/insights';
+import { testimonials } from '../data/site';
+---
+
+<Base>
+  <Hero />
+  <ClientMarquee />
+  <Showreel />
+  <FeaturedStack />
+  <Services />
+  <About />
+  {testimonials.length > 0 && <Testimonials />}
+
+  <section class="container section">
+    <div class="section-head head">
+      <SplitHeading text="Insights" class="h2" />
+      <a href="/insights" class="link" data-reveal>All {insights.length} insights</a>
+    </div>
+    <InsightRows items={insights.slice(0, 4)} />
+  </section>
+
+  <ContactBand slot="after" />
+</Base>
+
+<style>
+  .head {
+    margin-bottom: clamp(36px, 4vw, 56px);
+  }
+</style>

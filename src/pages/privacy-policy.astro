@@ -1,0 +1,58 @@
+---
+import Base from '../layouts/Base.astro';
+import SplitHeading from '../components/SplitHeading.astro';
+import ContactBand from '../components/ContactBand.astro';
+import { privacy } from '../data/site';
+---
+
+<Base title="Privacy Policy" description="How this site handles the information you send through the contact form.">
+  <article class="container page">
+    <SplitHeading as="h1" text="Privacy policy" class="h1" />
+    <p class="updated" data-reveal>Last updated: {privacy.updated}</p>
+    <div class="sections">
+      {
+        privacy.sections.map((s) => (
+          <section data-reveal>
+            <h2>{s.title}</h2>
+            <p>{s.body}</p>
+          </section>
+        ))
+      }
+    </div>
+  </article>
+  <ContactBand slot="after" />
+</Base>
+
+<style>
+  .page {
+    max-width: 960px;
+    padding-top: clamp(48px, 7vw, 112px);
+    padding-bottom: var(--section);
+  }
+
+  .updated {
+    margin-top: 20px;
+    color: var(--muted);
+  }
+
+  .sections {
+    margin-top: clamp(40px, 5vw, 64px);
+    display: grid;
+    gap: 40px;
+    max-width: 680px;
+  }
+
+  h2 {
+    font-size: 24px;
+    font-weight: 640;
+    font-stretch: 115%;
+    letter-spacing: -0.015em;
+  }
+
+  p {
+    margin-top: 10px;
+    font-size: 18px;
+    line-height: 1.65;
+    color: var(--text-2);
+  }
+</style>

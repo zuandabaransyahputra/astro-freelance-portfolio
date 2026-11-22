@@ -1,0 +1,161 @@
+---
+/*
+ * A tilted wall of project screenshots. Each column loops on its own and
+ * drifts with the page scroll (see initShowreel in scripts/motion.ts).
+ */
+import { Picture } from 'astro:assets';
+import { projects } from '../data/projects';
+
+const columnCount = 4;
+const columns: (typeof projects)[] = Array.from({ length: columnCount }, () => []);
+// With only a few projects, repeat them so every column stays full (about 4 shots each).
+const pool = Array.from({ length: Math.max(projects.length, columnCount * 4) }, (_, i) => projects[i % projects.length]);
+pool.forEach((p, i) => columns[i % columnCount].push(p));
+const durations = [62, 74, 58, 70];
+---
+
+<section class="reel" data-showreel aria-label="A moving wall of project screenshots">
+  <div class="plane" aria-hidden="true">
+    {
+      columns.map((col, i) => (
+        <div class="col" data-reel-col>
+          <div class="track" style={`--dur: ${durations[i]}s; --dir: ${i % 2 ? 'reverse' : 'normal'}`}>
+            {[...col, ...col].map((p) => (
+              <figure class="shot" style={`--tint: ${p.tint}`}>
+                <Picture
+                  src={p.image}
+                  alt=""
+                  formats={['avif', 'webp']}
+                  widths={[360, 560]}
+                  sizes="(max-width: 700px) 50vw, 26vw"
+                  loading="lazy"
+                />
+                <figcaption>{p.title}</figcaption>
+              </figure>
+            ))}
+          </div>
+        </div>
+      ))
+    }
+  </div>
+
+  <div class="scrim" aria-hidden="true"></div>
+
+  <div class="copy container">
+    <p class="statement" data-reveal>
+      {projects.length} projects — stores, dashboards, studio sites and apps — for founders and teams around the
+      world.
+    </p>
+  </div>
+</section>
+
+<style>
+  .reel {
+    position: relative;
+    height: clamp(640px, 110vh, 1040px);
+    overflow: hidden;
+    background: var(--ink);
+    color: var(--paper);
+    --reel-p: 0.5;
+  }
+
+  .plane {
+    position: absolute;
+    inset: -30% -20%;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: clamp(14px, 1.8vw, 28px);
+    transform: perspective(1600px) rotateX(calc(26deg - var(--reel-p) * 12deg)) rotateZ(-12deg) scale(1.05);
+    transform-origin: 50% 40%;
+  }
+
+  .col {
+    will-change: translate;
+  }
+
+  .track {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(14px, 1.8vw, 28px);
+    animation: reel var(--dur) linear infinite;
+    animation-direction: var(--dir);
+  }
+
+  .reel:hover .track {
+    animation-play-state: paused;
+  }
+
+  @keyframes reel {
+    to {
+      transform: translateY(calc(-50% - clamp(7px, 0.9vw, 14px)));
+    }
+  }
+
+  .shot {
+    position: relative;
+    aspect-ratio: 16 / 11;
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--tint);
+    box-shadow: 0 30px 60px -30px rgb(0 0 0 / 0.8);
+  }
+
+  .shot :global(picture),
+  .shot :global(img) {
+    width: 100%;
+    height: 100%;
+  }
+
+  .shot :global(img) {
+    object-fit: cover;
+    object-position: 50% 0%;
+  }
+
+  .shot figcaption {
+    position: absolute;
+    left: 12px;
+    bottom: 12px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgb(20 23 31 / 0.78);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .scrim {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(180deg, var(--ink) 0%, transparent 22%, transparent 55%, rgb(20 23 31 / 0.92) 88%),
+      radial-gradient(70% 60% at 50% 50%, transparent, rgb(20 23 31 / 0.35));
+    pointer-events: none;
+  }
+
+  .copy {
+    position: absolute;
+    inset: auto 0 clamp(40px, 6vw, 88px);
+  }
+
+  .statement {
+    max-width: 26ch;
+    font-size: clamp(26px, 3.7vw, 58px);
+    line-height: 1.02;
+    font-weight: 640;
+    font-stretch: 125%;
+    letter-spacing: -0.035em;
+    text-wrap: balance;
+  }
+
+  @media (max-width: 700px) {
+    .plane {
+      inset: -20% -60%;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .plane {
+      transform: perspective(1600px) rotateX(20deg) rotateZ(-12deg) scale(1.05);
+    }
+  }
+</style>

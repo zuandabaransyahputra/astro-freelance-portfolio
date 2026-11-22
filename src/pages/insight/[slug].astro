@@ -1,0 +1,248 @@
+---
+import Base from '../../layouts/Base.astro';
+import SplitHeading from '../../components/SplitHeading.astro';
+import InsightRows from '../../components/InsightRows.astro';
+import ContactBand from '../../components/ContactBand.astro';
+import { formatDate, insights, type Insight } from '../../data/insights';
+
+export function getStaticPaths() {
+  return insights.map((insight) => ({ params: { slug: insight.slug }, props: { insight } }));
+}
+
+interface Props {
+  insight: Insight;
+}
+
+const { insight } = Astro.props;
+const [intro, ...blocks] = insight.blocks;
+const more = insights.filter((i) => i.slug !== insight.slug).slice(0, 3);
+const description = intro.type === 'p' ? intro.text : undefined;
+
+const site = Astro.site!.toString();
+const pageUrl = new URL(`/insight/${insight.slug}`, site).toString();
+const schema = [
+  {
+    '@type': 'BlogPosting',
+    '@id': `${pageUrl}#article`,
+    headline: insight.title,
+    description,
+    url: pageUrl,
+    mainEntityOfPage: pageUrl,
+    datePublished: insight.date,
+    dateModified: insight.date,
+    articleSection: insight.category,
+    inLanguage: 'en',
+    image: new URL(insight.image.src, site).toString(),
+    author: { '@id': `${site}#person` },
+    publisher: { '@id': `${site}#person` },
+  },
+  {
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: site },
+      { '@type': 'ListItem', position: 2, name: 'Insights', item: new URL('/insights', site).toString() },
+      { '@type': 'ListItem', position: 3, name: insight.title, item: pageUrl },
+    ],
+  },
+];
+---
+
+<Base
+  title={insight.title}
+  description={description}
+  type="article"
+  published={insight.date}
+  schema={schema}
+>
+  <div class="progress" aria-hidden="true"><span data-progress></span></div>
+
+  <article class="container article" data-article>
+    <header class="head">
+      <a href="/insights" class="back" data-reveal="fade">Insights</a>
+      <p class="meta" data-reveal="fade">
+        <span>{insight.category}</span>
+        <time datetime={insight.date}>{formatDate(insight.date)}</time>
+        <span>{insight.readTime}</span>
+      </p>
+      <SplitHeading as="h1" text={insight.title} class="h1 title" />
+      {intro.type === 'p' && <p class="intro" data-reveal>{intro.text}</p>}
+    </header>
+
+    <div class="prose">
+      {
+        blocks.map((b) => {
+          if (b.type === 'h2') return <h2 data-reveal>{b.text}</h2>;
+          if (b.type === 'quote')
+            return (
+              <blockquote class="pull" data-reveal>
+                {b.text}
+              </blockquote>
+            );
+          if (b.type === 'figure')
+            return (
+              <figure class="figure" data-reveal="scale">
+                <div class="figure__art">
+                  <img src={insight.image.src} alt="" width={insight.image.width} height={insight.image.height} loading="lazy" />
+                </div>
+                <figcaption>{b.caption}</figcaption>
+              </figure>
+            );
+          return <p data-reveal>{b.text}</p>;
+        })
+      }
+
+      <p class="closing" data-reveal>
+        If any of this maps to a project you are planning, I am happy to talk it through — no pitch, just a second pair of
+        eyes. <a href="/contact" class="link">Start a conversation</a>
+      </p>
+    </div>
+  </article>
+
+  <section class="container section more">
+    <h2 class="more__title" data-reveal>More insights</h2>
+    <InsightRows items={more} />
+  </section>
+
+  <ContactBand slot="after" />
+</Base>
+
+<style>
+  .progress {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 55;
+    height: 3px;
+    pointer-events: none;
+  }
+
+  .progress span {
+    display: block;
+    height: 100%;
+    background: var(--accent);
+    transform-origin: 0 50%;
+    transform: scaleX(0);
+  }
+
+  .article {
+    max-width: 1040px;
+    padding-top: clamp(40px, 6vw, 96px);
+  }
+
+  .back {
+    display: inline-block;
+    margin-bottom: 24px;
+    font-size: 15px;
+    color: var(--muted);
+    text-decoration: none;
+  }
+
+  .back:hover {
+    color: var(--ink);
+  }
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    margin-bottom: 20px;
+    font-size: 15px;
+    color: var(--muted);
+  }
+
+  .meta span:first-child {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .head :global(.title) {
+    font-size: clamp(38px, 5.6vw, 84px);
+  }
+
+  .intro {
+    margin-top: clamp(28px, 3vw, 44px);
+    font-size: clamp(21px, 2vw, 28px);
+    line-height: 1.45;
+    font-weight: 500;
+    color: var(--ink-2);
+    text-wrap: pretty;
+  }
+
+  .prose {
+    margin-top: clamp(40px, 5vw, 72px);
+    max-width: 720px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    font-size: clamp(18px, 1.35vw, 20px);
+    line-height: 1.7;
+  }
+
+  .prose h2 {
+    margin-top: 24px;
+    font-size: clamp(26px, 2.4vw, 34px);
+    line-height: 1.15;
+    font-weight: 640;
+    font-stretch: 115%;
+    letter-spacing: -0.02em;
+  }
+
+  .figure {
+    margin: 24px 0;
+    width: min(1040px, calc(100vw - 2 * var(--gutter)));
+  }
+
+  .figure__art {
+    border-radius: 24px;
+    overflow: hidden;
+    background: var(--surface);
+  }
+
+  .figure__art img {
+    width: 100%;
+    height: auto;
+  }
+
+  .figure figcaption {
+    margin-top: 12px;
+    font-size: 15px;
+    color: var(--muted);
+  }
+
+  .pull {
+    margin: 16px 0;
+    font-size: clamp(26px, 2.6vw, 38px);
+    line-height: 1.2;
+    font-weight: 600;
+    font-stretch: 112%;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  .pull::before {
+    content: '“';
+    display: block;
+    height: 0.55em;
+    font-size: 2.4em;
+    line-height: 1;
+    color: var(--accent);
+  }
+
+  .closing {
+    margin-top: 24px;
+    padding-top: 28px;
+    border-top: 1px solid var(--rule);
+    color: var(--text-2);
+  }
+
+  .more {
+    max-width: var(--maxw);
+  }
+
+  .more__title {
+    margin-bottom: 32px;
+    font-size: clamp(28px, 3vw, 44px);
+    font-weight: 640;
+    font-stretch: 120%;
+    letter-spacing: -0.025em;
+  }
+</style>

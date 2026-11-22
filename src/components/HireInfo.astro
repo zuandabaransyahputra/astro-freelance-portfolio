@@ -1,0 +1,127 @@
+---
+import { faq, hireProcess } from '../data/site';
+
+// "How hiring works" steps plus the FAQ. Pages that use it should also add
+// `faqSchema` to their JSON-LD so search engines and AI assistants can quote the answers.
+---
+
+<section class="container hire" aria-labelledby="hire-title">
+  <div class="block">
+    <h2 id="hire-title" class="h2" data-reveal>How hiring works</h2>
+    <ol class="steps">
+      {
+        hireProcess.map((step, i) => (
+          <li data-reveal style={`--d: ${i * 0.08}s`}>
+            <span class="steps__n">{String(i + 1).padStart(2, '0')}</span>
+            <h3>{step.title}</h3>
+            <p>{step.detail}</p>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+
+  <div class="block">
+    <h2 class="h2" data-reveal>Questions clients ask</h2>
+    <div class="faq">
+      {
+        faq.map((item) => (
+          <details data-reveal>
+            <summary>{item.q}</summary>
+            <p>{item.a}</p>
+          </details>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .hire {
+    display: grid;
+    gap: clamp(64px, 8vw, 120px);
+    padding-bottom: var(--section);
+  }
+
+  .block {
+    display: grid;
+    gap: clamp(32px, 4vw, 56px);
+  }
+
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+    gap: 16px;
+    list-style: none;
+  }
+
+  .steps li {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: clamp(22px, 2.4vw, 32px);
+    border-radius: 22px;
+    background: var(--surface);
+  }
+
+  .steps__n {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accent);
+  }
+
+  .steps h3 {
+    font-size: 21px;
+    font-weight: 640;
+  }
+
+  .steps p {
+    color: var(--text-2);
+    line-height: 1.5;
+  }
+
+  .faq {
+    border-top: 1px solid var(--rule);
+  }
+
+  details {
+    border-bottom: 1px solid var(--rule);
+  }
+
+  summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+    padding: 24px 0;
+    font-size: clamp(19px, 1.6vw, 24px);
+    font-weight: 600;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  summary::after {
+    content: '+';
+    flex: 0 0 auto;
+    font-size: 28px;
+    font-weight: 400;
+    line-height: 1;
+    transition: transform 0.3s var(--ease-out);
+  }
+
+  details[open] summary::after {
+    transform: rotate(45deg);
+  }
+
+  details p {
+    max-width: 70ch;
+    padding-bottom: 28px;
+    font-size: clamp(17px, 1.3vw, 19px);
+    line-height: 1.6;
+    color: var(--text-2);
+  }
+</style>

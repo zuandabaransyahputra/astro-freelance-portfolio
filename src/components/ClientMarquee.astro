@@ -1,0 +1,90 @@
+---
+import { clients } from '../data/site';
+---
+
+<section class="marquee" aria-label="Clients">
+  <div class="track">
+    <ul class="list">
+      {clients.map((name) => <li><span class="dot" aria-hidden="true"></span>{name}</li>)}
+    </ul>
+    <ul class="list" aria-hidden="true">
+      {clients.map((name) => <li><span class="dot"></span>{name}</li>)}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .marquee {
+    border-block: 1px solid var(--rule);
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  }
+
+  .track {
+    display: flex;
+    width: max-content;
+    padding-block: 30px;
+    animation: marquee 48s linear infinite;
+  }
+
+  .marquee:hover .track {
+    animation-play-state: paused;
+  }
+
+  @keyframes marquee {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  .list {
+    display: flex;
+    align-items: center;
+    gap: 64px;
+    padding-right: 64px;
+    font-size: 26px;
+    font-weight: 600;
+    font-stretch: 112%;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+    color: var(--ink-2);
+    white-space: nowrap;
+  }
+
+  .list li {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  /* Without motion, show the names as a wrapped list instead. */
+  @media (prefers-reduced-motion: reduce) {
+    .marquee {
+      -webkit-mask-image: none;
+      mask-image: none;
+    }
+
+    .track {
+      width: auto;
+      padding-inline: var(--gutter);
+    }
+
+    .list {
+      flex-wrap: wrap;
+      gap: 12px 40px;
+      white-space: normal;
+    }
+
+    .list[aria-hidden='true'] {
+      display: none;
+    }
+  }
+</style>

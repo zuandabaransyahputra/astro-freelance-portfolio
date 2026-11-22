@@ -1,0 +1,44 @@
+---
+import Base from '../layouts/Base.astro';
+import Button from '../components/Button.astro';
+---
+
+<Base title="Page not found" noindex>
+  <section class="container nf">
+    <p class="code" aria-hidden="true">404</p>
+    <h1 class="h1">This page doesn’t exist.</h1>
+    <p class="lede">The link may be old, or the page moved when the site was rebuilt.</p>
+    <div class="ctas">
+      <Button href="/">Back to the homepage</Button>
+      <a href="/works" class="link">See the work</a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .nf {
+    min-height: calc(100vh - var(--header-h));
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 24px;
+    padding-block: 64px;
+  }
+
+  .code {
+    font-size: clamp(120px, 26vw, 360px);
+    line-height: 0.8;
+    font-weight: 700;
+    font-stretch: 125%;
+    letter-spacing: -0.06em;
+    color: transparent;
+    -webkit-text-stroke: 2px var(--accent);
+  }
+
+  .ctas {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px 28px;
+  }
+</style>

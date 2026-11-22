@@ -1,0 +1,130 @@
+---
+import Base from '../layouts/Base.astro';
+import SplitHeading from '../components/SplitHeading.astro';
+import InsightRows from '../components/InsightRows.astro';
+import ContactBand from '../components/ContactBand.astro';
+import { formatDate, insights } from '../data/insights';
+
+const [latest, ...rest] = insights;
+---
+
+<Base
+  title="Insights on Web Development, CMS & AI"
+  description="Notes on frameworks, headless CMS, payments, AI features, performance and accessibility from client projects."
+>
+  <section class="container intro">
+    <SplitHeading as="h1" text="Insights" class="display" />
+    <p class="lede" data-reveal>Notes on the decisions behind client projects — frameworks, CMS, payments, AI and the craft in between.</p>
+  </section>
+
+  <section class="container">
+    <a href={`/insight/${latest.slug}`} class="feature card" data-reveal="scale" data-cursor="Read">
+      <div class="feature__art">
+        <img src={latest.image.src} alt="" width={latest.image.width} height={latest.image.height} />
+      </div>
+      <div class="feature__text">
+        <span class="feature__meta">
+          <span>Latest</span>
+          <span>{latest.category}</span>
+          <time datetime={latest.date}>{formatDate(latest.date)}</time>
+        </span>
+        <span class="feature__title">{latest.title}</span>
+        <span class="feature__time">{latest.readTime}</span>
+      </div>
+    </a>
+  </section>
+
+  <section class="container section list">
+    <InsightRows items={rest} />
+  </section>
+
+  <ContactBand slot="after" />
+</Base>
+
+<style>
+  .intro {
+    padding-top: clamp(48px, 7vw, 112px);
+    padding-bottom: clamp(40px, 5vw, 72px);
+  }
+
+  .intro .lede {
+    margin-top: clamp(24px, 3vw, 40px);
+  }
+
+  .feature {
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    gap: 0;
+    border-radius: 28px;
+    overflow: hidden;
+    background: var(--surface);
+    text-decoration: none;
+    transition: box-shadow 0.5s var(--ease-out);
+  }
+
+  .feature:hover {
+    color: inherit;
+    box-shadow: 0 40px 80px -48px rgb(20 23 31 / 0.5);
+  }
+
+  .feature__art {
+    overflow: hidden;
+    background: var(--chip);
+  }
+
+  .feature__art img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 1.2s var(--ease-out);
+  }
+
+  .feature:hover .feature__art img {
+    transform: scale(1.05);
+  }
+
+  .feature__text {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: clamp(28px, 3.4vw, 52px);
+  }
+
+  .feature__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  .feature__meta span:first-child {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .feature__title {
+    margin-top: auto;
+    font-size: clamp(30px, 3.4vw, 52px);
+    line-height: 1.02;
+    font-weight: 640;
+    font-stretch: 118%;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+  }
+
+  .feature__time {
+    font-size: 15px;
+    color: var(--muted);
+  }
+
+  .list {
+    padding-top: clamp(56px, 6vw, 96px);
+  }
+
+  @media (max-width: 860px) {
+    .feature {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

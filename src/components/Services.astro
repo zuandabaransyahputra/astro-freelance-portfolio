@@ -1,0 +1,142 @@
+---
+import SplitHeading from './SplitHeading.astro';
+import { services } from '../data/site';
+---
+
+<section id="services" class="band">
+  <div class="container section">
+    <div class="section-head">
+      <SplitHeading text="What I do" class="h2" />
+      <p class="lede" data-reveal>Three kinds of work, usually in the same project.</p>
+    </div>
+    <div class="grid">
+      {
+        services.map((service, i) => (
+          <div class="service" data-reveal style={`--d: ${i * 0.12}s`}>
+            <h3>{service.title}</h3>
+            <p>{service.description}</p>
+            <ul>
+              {service.items.map((item) => (
+                <li>{item}</li>
+              ))}
+            </ul>
+            <div class="links">
+              <a href={`/services/${service.slug}`} class="link">
+                Hire me for {service.title.toLowerCase()}
+              </a>
+              <a href={service.link.href} class="link">
+                {service.link.label}
+              </a>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .band {
+    background: var(--surface);
+    border-block: 1px solid var(--rule-soft);
+  }
+
+  .grid {
+    margin-top: clamp(48px, 6vw, 72px);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
+    gap: 24px;
+  }
+
+  .service {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: clamp(24px, 2.6vw, 36px);
+    border-radius: 22px;
+    background: var(--paper);
+    overflow: hidden;
+    transition:
+      background-color 0.4s,
+      color 0.4s,
+      transform 0.6s var(--ease-out);
+  }
+
+  .service::before {
+    content: '';
+    position: absolute;
+    inset: auto -20% -60% auto;
+    width: 70%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: var(--accent);
+    opacity: 0;
+    transform: scale(0.4);
+    transition:
+      opacity 0.5s,
+      transform 0.8s var(--ease-out);
+  }
+
+  .service:hover {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  .service:hover::before {
+    opacity: 0.9;
+    transform: none;
+  }
+
+  .service > * {
+    position: relative;
+  }
+
+  h3 {
+    font-size: clamp(24px, 2vw, 30px);
+    line-height: 1.1;
+    font-weight: 640;
+    font-stretch: 120%;
+    letter-spacing: -0.02em;
+  }
+
+  p {
+    color: var(--text-2);
+    text-wrap: pretty;
+    transition: color 0.4s;
+  }
+
+  .service:hover p {
+    color: var(--dark-text);
+  }
+
+  ul {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid var(--rule);
+    transition: border-color 0.4s;
+  }
+
+  ul li {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--rule);
+    font-size: 16px;
+    font-weight: 550;
+    transition: border-color 0.4s;
+  }
+
+  .service:hover ul,
+  .service:hover ul li {
+    border-color: var(--dark-rule);
+  }
+
+  .links {
+    margin-top: auto;
+    padding-top: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+</style>

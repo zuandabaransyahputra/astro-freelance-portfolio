@@ -1,0 +1,173 @@
+---
+import { formatDate, type Insight } from '../data/insights';
+
+interface Props {
+  items: Insight[];
+}
+
+const { items } = Astro.props;
+---
+
+<ul class="rows" data-hover-preview>
+  {
+    items.map((item, i) => (
+      <li data-reveal style={`--d: ${Math.min(i, 5) * 0.05}s`}>
+        <a href={`/insight/${item.slug}`} class="row" data-preview={item.image.src}>
+          <span class="row__meta">
+            <span>{item.category}</span>
+            <time datetime={item.date}>{formatDate(item.date)}</time>
+          </span>
+          <span class="row__title">{item.title}</span>
+          <span class="row__time">{item.readTime}</span>
+          <img class="row__thumb" src={item.image.src} alt="" loading="lazy" width="160" height="100" />
+        </a>
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .rows {
+    border-top: 1px solid var(--rule);
+  }
+
+  li {
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .row {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(150px, 1fr) minmax(0, 3fr) auto;
+    align-items: baseline;
+    gap: 12px 32px;
+    padding: clamp(22px, 2.4vw, 32px) 0;
+    text-decoration: none;
+    isolation: isolate;
+  }
+
+  /* An ink panel wipes in behind the row on hover. */
+  .row::before {
+    content: '';
+    position: absolute;
+    inset: 0 calc(var(--gutter) * -0.5);
+    z-index: -1;
+    border-radius: 14px;
+    background: var(--ink);
+    transform: scaleY(0);
+    transform-origin: 50% 100%;
+    transition: transform 0.5s var(--ease-out);
+  }
+
+  .row:hover {
+    color: var(--paper);
+  }
+
+  .row:hover::before {
+    transform: none;
+  }
+
+  .row__meta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 14px;
+    color: var(--muted);
+    transition: color 0.3s;
+  }
+
+  .row__title {
+    font-size: clamp(22px, 2.2vw, 32px);
+    line-height: 1.15;
+    font-weight: 620;
+    font-stretch: 112%;
+    letter-spacing: -0.02em;
+    transition: transform 0.5s var(--ease-out);
+  }
+
+  .row:hover .row__title {
+    transform: translateX(10px);
+  }
+
+  .row:hover .row__meta,
+  .row:hover .row__time {
+    color: var(--dark-text);
+  }
+
+  .row__time {
+    font-size: 14px;
+    color: var(--muted);
+    white-space: nowrap;
+    transition: color 0.3s;
+  }
+
+  .row__thumb {
+    display: none;
+  }
+
+  @media (max-width: 760px) {
+    .row {
+      grid-template-columns: minmax(0, 1fr) 112px;
+      align-items: start;
+    }
+
+    .row__meta {
+      grid-column: 1;
+      flex-direction: row;
+      gap: 12px;
+    }
+
+    .row__title {
+      grid-column: 1;
+    }
+
+    .row__time {
+      display: none;
+    }
+
+    .row__thumb {
+      display: block;
+      grid-column: 2;
+      grid-row: 1 / span 2;
+      width: 112px;
+      height: auto;
+      border-radius: 10px;
+      background: var(--chip);
+    }
+  }
+</style>
+
+<style is:global>
+  .hover-preview {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 40;
+    width: 280px;
+    aspect-ratio: 16 / 10;
+    border-radius: 16px;
+    overflow: hidden;
+    background: var(--chip);
+    box-shadow: 0 30px 60px -30px rgb(20 23 31 / 0.6);
+    pointer-events: none;
+    opacity: 0;
+    scale: 0.6;
+    rotate: -6deg;
+    transition:
+      opacity 0.3s,
+      scale 0.5s var(--ease-out),
+      rotate 0.5s var(--ease-out);
+  }
+
+  .hover-preview.is-visible {
+    opacity: 1;
+    scale: 1;
+    rotate: 0deg;
+  }
+
+  .hover-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+</style>

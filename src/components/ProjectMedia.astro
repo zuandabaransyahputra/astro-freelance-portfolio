@@ -1,0 +1,302 @@
+---
+/*
+ * Presents a project screenshot as a finished shot: a brand-tinted panel with the
+ * site inside a browser window (or, for mobile-first products, on two phones).
+ * Hovering the parent `.card` lifts the window and scrolls the page inside it.
+ */
+import type { ImageMetadata } from 'astro';
+import { Picture } from 'astro:assets';
+import type { Project } from '../data/projects';
+
+interface Props {
+  project: Project;
+  image?: ImageMetadata;
+  size?: 'card' | 'stack' | 'hero' | 'figure';
+  sizes?: string;
+  eager?: boolean;
+  parallax?: boolean;
+  transitionName?: string;
+  /** Defaults to a description of the screenshot; pass "" where it would only repeat nearby text. */
+  alt?: string;
+}
+
+const {
+  project,
+  image = project.image,
+  size = 'card',
+  sizes,
+  eager = false,
+  parallax = true,
+  transitionName,
+  alt = `${project.title} ${project.device === 'phone' ? 'app' : 'website'} screenshot — ${project.industry}`,
+} = Astro.props;
+
+const defaultSizes = {
+  card: '(max-width: 900px) 92vw, 640px',
+  stack: '(max-width: 900px) 92vw, 760px',
+  hero: '(max-width: 1440px) 92vw, 1320px',
+  figure: '(max-width: 1100px) 92vw, 960px',
+}[size];
+
+const phoneSizes = size === 'hero' || size === 'figure' ? '(max-width: 900px) 300vw, 1600px' : '(max-width: 900px) 250vw, 900px';
+const widths = [480, 800, 1200, 1600, 2000].filter((w) => w <= image.width);
+---
+
+<div
+  class:list={['media', `media--${size}`]}
+  data-device={project.device}
+  style={`--tint: ${project.tint};${transitionName ? ` view-transition-name: ${transitionName};` : ''}`}
+>
+  <div class="stage" data-parallax={parallax ? '0.045' : undefined}>
+    {
+      project.device === 'phone' ? (
+        <div class="phones">
+          <div class="phone phone--a">
+            <div class="screen">
+              <Picture
+                src={image}
+                alt={alt}
+                formats={['avif', 'webp']}
+                widths={widths}
+                sizes={phoneSizes}
+                loading={eager ? 'eager' : 'lazy'}
+                class="screen__img"
+              />
+            </div>
+          </div>
+          <div class="phone phone--b">
+            <div class="screen">
+              <Picture
+                src={image}
+                alt=""
+                formats={['avif', 'webp']}
+                widths={widths}
+                sizes={phoneSizes}
+                loading={eager ? 'eager' : 'lazy'}
+                class="screen__img screen__img--lower"
+              />
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div class="window">
+          <div class="bar">
+            <span class="dots" aria-hidden="true">
+              <i />
+              <i />
+              <i />
+            </span>
+            <span class="url">{project.domain ?? project.title}</span>
+            <span class="dots dots--ghost" aria-hidden="true" />
+          </div>
+          <div class="view">
+            <Picture
+              src={image}
+              alt={alt}
+              formats={['avif', 'webp']}
+              widths={widths}
+              sizes={sizes ?? defaultSizes}
+              loading={eager ? 'eager' : 'lazy'}
+              fetchpriority={eager ? 'high' : undefined}
+              class="view__img"
+            />
+          </div>
+        </div>
+      )
+    }
+  </div>
+</div>
+
+<style>
+  .media {
+    position: relative;
+    overflow: hidden;
+    border-radius: 20px;
+    aspect-ratio: 16 / 11;
+    background:
+      radial-gradient(120% 90% at 12% 0%, rgb(255 255 255 / 0.22), transparent 60%),
+      var(--tint);
+    isolation: isolate;
+  }
+
+  .media--stack {
+    aspect-ratio: auto;
+    height: 100%;
+    border-radius: 16px;
+  }
+
+  .media--hero {
+    aspect-ratio: 16 / 9;
+    border-radius: 28px;
+  }
+
+  .media--figure {
+    aspect-ratio: 16 / 10;
+    border-radius: 24px;
+  }
+
+  .stage {
+    position: absolute;
+    inset: 0;
+    will-change: transform;
+  }
+
+  /* ---------- Browser window ---------- */
+
+  .window {
+    position: absolute;
+    inset: 9% 7% -6% 7%;
+    display: flex;
+    flex-direction: column;
+    border-radius: 12px 12px 0 0;
+    overflow: hidden;
+    background: #fff;
+    box-shadow:
+      0 0 0 1px rgb(0 0 0 / 0.06),
+      0 50px 90px -40px rgb(0 0 0 / 0.55),
+      0 18px 36px -24px rgb(0 0 0 / 0.35);
+    transition: transform 0.8s var(--ease-out);
+  }
+
+  .media--hero .window {
+    inset: 8% 9% -6% 9%;
+    border-radius: 16px 16px 0 0;
+  }
+
+  .bar {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    height: clamp(26px, 2.6vw, 38px);
+    padding: 0 clamp(10px, 1.2vw, 16px);
+    background: #f4f5f7;
+    border-bottom: 1px solid #e6e8ec;
+  }
+
+  .dots {
+    display: flex;
+    gap: 6px;
+    width: 52px;
+  }
+
+  .dots i {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #d3d7de;
+  }
+
+  .url {
+    flex: 0 1 46%;
+    min-width: 0;
+    height: 62%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 10px;
+    border-radius: 7px;
+    background: #e8eaee;
+    color: #4a5160;
+    font-size: clamp(10px, 0.85vw, 13px);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .view {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    background: #fff;
+  }
+
+  .view :global(picture) {
+    height: 100%;
+  }
+
+  .view :global(.view__img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 0%;
+    transition: object-position 2.6s cubic-bezier(0.3, 0.1, 0.2, 1);
+  }
+
+  :global(.card:hover) .window,
+  :global(.card:focus-within) .window {
+    transform: translateY(-12px);
+  }
+
+  :global(.card:hover) .view :global(.view__img) {
+    object-position: 50% 45%;
+  }
+
+  /* ---------- Phones ---------- */
+
+  .phones {
+    position: absolute;
+    inset: 0;
+  }
+
+  .phone {
+    position: absolute;
+    width: 29%;
+    aspect-ratio: 9 / 19.5;
+    padding: 1.1%;
+    border-radius: clamp(22px, 3.4vw, 46px);
+    background: #121318;
+    box-shadow:
+      0 0 0 1px rgb(255 255 255 / 0.08) inset,
+      0 50px 80px -36px rgb(0 0 0 / 0.55),
+      0 18px 30px -20px rgb(0 0 0 / 0.35);
+    transition: transform 0.9s var(--ease-out);
+  }
+
+  .phone--a {
+    left: 17%;
+    top: 9%;
+    transform: rotate(-4deg);
+  }
+
+  .phone--b {
+    right: 17%;
+    top: 19%;
+    transform: rotate(4deg);
+  }
+
+  :global(.card:hover) .phone--a {
+    transform: rotate(-6deg) translate(-10px, -12px);
+  }
+
+  :global(.card:hover) .phone--b {
+    transform: rotate(6deg) translate(10px, -16px);
+  }
+
+  .screen {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    border-radius: clamp(17px, 2.9vw, 38px);
+    background: #fbf9f5;
+  }
+
+  /*
+   * The source is a desktop capture with the mobile layout in a centred column
+   * (36.1% → 63.9% of the width). Scaling it up crops that column into the screen.
+   */
+  .screen :global(.screen__img) {
+    position: absolute;
+    top: 0;
+    left: -129.9%;
+    width: 359.7%;
+    max-width: none;
+    height: auto;
+  }
+
+  .screen :global(.screen__img--lower) {
+    top: -20%;
+  }
+</style>

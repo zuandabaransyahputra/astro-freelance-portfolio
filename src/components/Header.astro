@@ -1,0 +1,319 @@
+---
+import { config, nav } from '../data/site';
+import Button from './Button.astro';
+
+const path = Astro.url.pathname;
+const isActive = (href: string) =>
+  href.startsWith('/#') ? false : path === href || (href !== '/' && path.startsWith(href.replace(/s$/, '')));
+---
+
+<header class="header" data-header transition:name="site-header" transition:animate="none">
+  <div class="bar container">
+    <a href="/" class="brand" aria-label={`${config.name}, home`}>
+      <span class="brand__mark" aria-hidden="true">{config.monogram}</span>
+      <span class="brand__name">{config.name}</span>
+    </a>
+
+    <nav class="nav" aria-label="Main">
+      <ul>
+        {
+          nav.map((item) => (
+            <li>
+              <a href={item.href} aria-current={isActive(item.href) ? 'page' : undefined}>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="actions">
+      <span class="status"><span class="status__dot" aria-hidden="true"></span>{config.availability.short}</span>
+      <Button href="/contact" variant="ink" size="sm" class="cta">Start a project</Button>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-menu" data-menu-toggle>
+        <span class="sr-only">Menu</span>
+        <span class="menu-toggle__lines" aria-hidden="true"><i></i><i></i></span>
+      </button>
+    </div>
+  </div>
+
+  <div class="overlay" id="mobile-menu">
+    <ul class="overlay__nav">
+      {
+        [{ label: 'Home', href: '/' }, ...nav].map((item, i) => (
+          <li style={`--i: ${i}`}>
+            <a href={item.href}>{item.label}</a>
+          </li>
+        ))
+      }
+    </ul>
+    <div class="overlay__foot">
+      <a href={`mailto:${config.email}`}>{config.email}</a>
+      {config.whatsapp && <a href={`https://wa.me/${config.whatsapp.number}`}>WhatsApp {config.whatsapp.label}</a>}
+      {config.socials.map((s) => <a href={s.href}>{s.label}</a>)}
+    </div>
+  </div>
+</header>
+
+<style>
+  .header {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: 50;
+    transition:
+      transform 0.5s var(--ease-out),
+      background-color 0.3s,
+      box-shadow 0.3s;
+  }
+
+  .header.is-scrolled {
+    background: rgb(242 243 245 / 0.82);
+    -webkit-backdrop-filter: saturate(1.4) blur(14px);
+    backdrop-filter: saturate(1.4) blur(14px);
+    box-shadow: 0 1px 0 var(--rule);
+  }
+
+  /* backdrop-filter would trap the fixed overlay inside the bar, so drop it while open. */
+  .header.is-open {
+    background: transparent;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    box-shadow: none;
+  }
+
+  .bar {
+    height: var(--header-h);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    font-size: 17px;
+    font-weight: 700;
+    font-stretch: 115%;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+  }
+
+  .brand__mark {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: var(--ink);
+    color: var(--paper);
+    display: grid;
+    place-items: center;
+    font-size: 17px;
+    font-stretch: 125%;
+    transition:
+      transform 0.5s var(--ease-out),
+      background-color 0.3s;
+  }
+
+  .brand:hover .brand__mark {
+    transform: rotate(-8deg) scale(1.06);
+    background: var(--accent);
+  }
+
+  .nav ul {
+    display: flex;
+    gap: 6px;
+    padding: 5px;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.6);
+    box-shadow: inset 0 0 0 1px var(--rule-soft);
+  }
+
+  .nav a {
+    display: block;
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-size: 15px;
+    font-weight: 550;
+    text-decoration: none;
+    transition:
+      background-color 0.25s,
+      color 0.25s;
+  }
+
+  .nav a:hover {
+    background: var(--chip);
+  }
+
+  .nav a[aria-current='page'] {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .status {
+    color: var(--text-2);
+  }
+
+
+  .menu-toggle {
+    display: none;
+    width: 44px;
+    height: 44px;
+    border: 0;
+    border-radius: 50%;
+    background: var(--ink);
+    cursor: pointer;
+    position: relative;
+    z-index: 2;
+  }
+
+  .menu-toggle__lines {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+  }
+
+  .menu-toggle__lines i {
+    position: absolute;
+    width: 18px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--paper);
+    transition: transform 0.4s var(--ease-out);
+  }
+
+  .menu-toggle__lines i:first-child {
+    transform: translateY(-4px);
+  }
+
+  .menu-toggle__lines i:last-child {
+    transform: translateY(4px);
+  }
+
+  .header.is-open .menu-toggle__lines i:first-child {
+    transform: rotate(45deg);
+  }
+
+  .header.is-open .menu-toggle__lines i:last-child {
+    transform: rotate(-45deg);
+  }
+
+  .overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: calc(var(--header-h) + 32px) var(--gutter) 40px;
+    background: var(--ink);
+    color: var(--paper);
+    clip-path: circle(0 at calc(100% - 42px) 38px);
+    visibility: hidden;
+    transition:
+      clip-path 0.7s var(--ease-out),
+      visibility 0s 0.7s;
+  }
+
+  .header.is-open .overlay {
+    clip-path: circle(150% at calc(100% - 42px) 38px);
+    visibility: visible;
+    transition:
+      clip-path 0.8s var(--ease-out),
+      visibility 0s;
+  }
+
+  .header.is-open .brand,
+  .header.is-open .menu-toggle {
+    position: relative;
+    z-index: 2;
+  }
+
+  .header.is-open .brand {
+    color: var(--paper);
+  }
+
+  .header.is-open .brand__mark {
+    background: var(--paper);
+    color: var(--ink);
+  }
+
+  .header.is-open .menu-toggle {
+    background: var(--paper);
+  }
+
+  .header.is-open .menu-toggle__lines i {
+    background: var(--ink);
+  }
+
+  .overlay__nav li {
+    overflow: hidden;
+  }
+
+  .overlay__nav a {
+    display: inline-block;
+    font-size: clamp(44px, 13vw, 88px);
+    line-height: 1.05;
+    font-weight: 640;
+    font-stretch: 125%;
+    letter-spacing: -0.04em;
+    text-decoration: none;
+    transform: translateY(110%);
+    transition: transform 0.7s var(--ease-out);
+  }
+
+  .header.is-open .overlay__nav a {
+    transform: none;
+    transition-delay: calc(0.15s + var(--i) * 0.06s);
+  }
+
+  .overlay__foot {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    color: var(--dark-text);
+    font-size: 16px;
+  }
+
+  .overlay__foot a {
+    text-decoration: none;
+    overflow-wrap: anywhere;
+  }
+
+  .actions :global(.cta) {
+    white-space: nowrap;
+  }
+
+  /* Five nav items: drop the extras before anything wraps. */
+  @media (max-width: 1280px) {
+    .status {
+      display: none;
+    }
+  }
+
+  @media (max-width: 960px) {
+    .nav,
+    .actions :global(.cta) {
+      display: none;
+    }
+
+    .menu-toggle {
+      display: block;
+    }
+  }
+
+  @media (max-width: 420px) {
+    .brand__name {
+      font-size: 15px;
+    }
+  }
+</style>
